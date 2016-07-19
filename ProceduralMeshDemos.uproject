@@ -1,13 +1,16 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.12",
+	"EngineAssociation": "{737553DA-499B-0E35-4B25-F1B0C0A00F37}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
 		{
 			"Name": "ProceduralMeshDemos",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	]
 }
