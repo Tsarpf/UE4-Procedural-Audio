@@ -8,7 +8,11 @@
 AProceduralSoundWave::AProceduralSoundWave()
 {
 	m_previousHeights.AddZeroed(1024);
-	m_zeroHeights.AddZeroed(1024);
+	//m_zeroHeights.AddZeroed(1024);
+	for (int i = 0; i < 1024; i++)
+	{
+		m_zeroHeights.Add(1);
+	}
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -135,7 +139,7 @@ void AProceduralSoundWave::GenerateWave
 		int heightIdx = static_cast<int>(y / Size.Y * smallerSize);
 		int heightIdxNext = static_cast<int>((y + 1) / Size.Y * smallerSize);
 		//int heightIdxNext = heightIdx + 1;
-		int scale = 8;
+		int scale = 16;
 		float bottomLeftZ = PreviousHeights[heightIdx] * scale;
 		float bottomRightZ = PreviousHeights[heightIdxNext] * scale;
 		float topLeftZ = Heights[heightIdx] * scale;

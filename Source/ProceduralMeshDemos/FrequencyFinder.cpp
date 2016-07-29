@@ -55,10 +55,19 @@ TArray<float> FrequencyFinder::GetHeights()
 		{
 			return freqs;
 		}
-		CalculateFrequencySpectrum(m_testChunk.chunk, 2, m_testChunk.size, freqs);
-		//CalculateFrequencySpectrum(chunk.chunk, 2, chunk.size, freqs);
+		//CalculateFrequencySpectrum(m_testChunk.chunk, 2, m_testChunk.size, freqs);
+		CalculateFrequencySpectrum(chunk.chunk, 2, chunk.size, freqs);
 	}
-	return freqs;
+	TArray<float> resultFloats;
+	int count = freqs.Num() * 2 - 1;
+	resultFloats.Reserve(count);
+	for (int i = 1; i < freqs.Num() / 2; i++)
+	{
+		//UE_LOG(LogTemp, Log, TEXT("i: %d, Sample value %f"), i, freqs[i]);
+		resultFloats.Add(freqs[i]);
+	}
+
+	return resultFloats;
 
 	/*
 	if (freqs.Num() == 0)
@@ -242,7 +251,7 @@ void FrequencyFinder::CalculateFrequencySpectrum
 
 				//if (bNormalizeOutputToDb)
 				//{
-				//	OutFrequencies[SampleIndex] = FMath::LogX(10, ChannelSum / NumChannels) * 10;
+					//OutFrequencies[SampleIndex] = FMath::LogX(10, ChannelSum / NumChannels) * 10;
 				//}
 				//else
 				//{
@@ -279,44 +288,6 @@ void FrequencyFinder::CalculateFrequencySpectrum
 	}
 }
 
-
-/*
-std::vector<float> FrequencyFinder::GetHeights(int CurrentTime)
-{
-	//static unsigned int previousEnd = 0;
-	//unsigned int sampleCount = sinceLast * 44100 / 1000 * 2;
-	static unsigned int currentTime = 0;
-	unsigned int lastTime = currentTime;
-	currentTime = CurrentTime;
-	unsigned int elapsedTime = currentTime - lastTime;
-	m_sampleCounter += elapsedTime * 48000.f / 1000.f * 2.f;
-
-	if (m_sampleCounter < m_bufferSize)
-	{
-		return std::vector<float>();
-	}
-
-	m_sampleCounter -= m_bufferSize;
-
-	int count = m_bufferSize / 128;
-	auto chunks = new std::vector<AudioChunk*>();
-	m_sink.Dequeue(chunks, count);
-
-	if (chunks->size() < count)
-	{
-		//std::cout << "not enough chunks " << chunks->size() << std::endl;
-		PrintError(TEXT("not enough chunks"));
-		//FreeChunks(chunks);
-		return std::vector<float>();
-	}
-
-	auto mags = GetFrequencyMagnitudes(*chunks);
-
-	//FreeChunks(chunks);
-	Logarithmize(mags);
-	return mags;
-}
-*/
 std::vector<float> FrequencyFinder::GetFrequencyMagnitudes(std::vector<AudioChunk*> chunks)
 {
 

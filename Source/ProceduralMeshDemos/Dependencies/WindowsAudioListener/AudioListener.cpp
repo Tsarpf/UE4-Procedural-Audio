@@ -86,7 +86,7 @@ AudioListener::AudioListener(int BitsPerSample, int FormatTag, int BlockAlign, i
 }
 AudioListener::~AudioListener()
 {
-	CoTaskMemFree(m_pwfx);
+	//CoTaskMemFree(m_pwfx);
 	SAFE_RELEASE(m_pEnumerator)
 	SAFE_RELEASE(m_pDevice)
 	SAFE_RELEASE(m_pAudioClient)
