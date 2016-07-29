@@ -260,7 +260,9 @@ void FrequencyFinder::CalculateFrequencySpectrum
 					//20 * log(2 * magnitude / N
 					//OutFrequencies[SampleIndex] = 20 * log(2 * ChannelSum)
 					//20 * log10(max(magnitude, 1e-10)); // 1e-10 = pow(10, -200/20);
-					OutFrequencies[SampleIndex] = 20 * FMath::LogX(10, std::max(ChannelSum, 1e-10));
+					//OutFrequencies[SampleIndex] = 20 * FMath::LogX(10, std::max(ChannelSum, 1e-3));
+					OutFrequencies[SampleIndex] = 20 * FMath::LogX(10, std::max(ChannelSum, 125000.0));
+					//UE_LOG(LogTemp, Log, TEXT("ChannelSum: %f"), ChannelSum);
 					//OutFrequencies[SampleIndex] = 20 * FMath::LogX(10, std::max(ChannelSum / ((double)NumChannels), 531072.0));
 				//OutFrequencies[SampleIndex] = 20 * FMath::LogX(10, 2 * (ChannelSum / NumChannels) * SampleIndex);
 
