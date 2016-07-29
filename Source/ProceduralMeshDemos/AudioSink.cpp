@@ -46,45 +46,6 @@ bool AudioSink::Dequeue(AudioChunk& Chunk)
 	*/
 }
 
-/*
-int AudioSink::CopyData(const BYTE* Data, const int NumFramesAvailable)
-{
-	std::lock_guard<std::mutex> lock(m_mutex);
-
-	//if (NumFramesAvailable % 448 != 0 || NumFramesAvailable == 0 || Data == NULL)
-	if (NumFramesAvailable % 480 != 0 || NumFramesAvailable == 0 || Data == NULL)
-	{
-		std::cout << "sample count wasn't 448, was: " << NumFramesAvailable << std::endl;
-		return 1;
-	}
-
-	const int divisor = sizeof(long) / sizeof(short);
-	short* dataStart = (short*)Data;
-
-	// Times two because there are frames * 2 samples. Because stereo
-	short* dataEnd = dataStart + NumFramesAvailable * 2;
-	for (short* data = (short*)Data; data < dataEnd; data += 128)
-	{
-		AudioChunk* chunk = new AudioChunk();
-
-		long long* copier = new long long[128 / divisor];
-
-		for (int i = 0; i < (128 / divisor); i++)
-		{
-			copier[i] = ((long long*)data)[i];
-		}
-
-		chunk->chunk = (short*)copier;
-
-		chunk->size = 128;
-
-		m_queue.push(chunk);
-	}
-
-	return 0;
-}
-*/
-
 int AudioSink::CopyData(const BYTE* Data, const int NumFramesAvailable)
 {
 	std::lock_guard<std::mutex> lock(m_mutex);

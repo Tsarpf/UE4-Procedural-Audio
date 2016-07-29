@@ -128,14 +128,14 @@ void AProceduralSoundWave::GenerateWave
 	float smallerSize = (float)std::min(Heights.Num(), PreviousHeights.Num());
 	auto time = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 	float epsilon = 0.1;
-	for (float y = 0; y < Size.Y  - 1 - epsilon; y++)
+	for (float y = 1; y < Size.Y - 1 - epsilon; y++)
 	//for (float y = 0; y < Size.Y; y++)
 	{
 		float yPos = y * m_yStepSize;
 		int heightIdx = static_cast<int>(y / Size.Y * smallerSize);
 		int heightIdxNext = static_cast<int>((y + 1) / Size.Y * smallerSize);
 		//int heightIdxNext = heightIdx + 1;
-		int scale = 1000;
+		int scale = 8;
 		float bottomLeftZ = PreviousHeights[heightIdx] * scale;
 		float bottomRightZ = PreviousHeights[heightIdxNext] * scale;
 		float topLeftZ = Heights[heightIdx] * scale;

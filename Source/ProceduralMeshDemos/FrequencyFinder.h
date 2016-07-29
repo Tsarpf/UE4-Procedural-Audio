@@ -55,5 +55,7 @@ void FrequencyFinder::CalculateFrequencySpectrum
 	std::atomic<bool> m_finished = false;
 
 	TArray<FrequencyStat> m_frequencyStats;
+
+	AudioChunk m_testChunk;
 };
 

@@ -18,6 +18,13 @@ FrequencyFinder::FrequencyFinder()
 	{
 		m_frequencyStats.Add(stat);
 	}
+
+	m_testChunk.size = 1024;
+	m_testChunk.chunk = new int16[1024];
+	for (int16 i = 0; i < 1024; i++)
+	{
+		m_testChunk.chunk[i] = 0;
+	}
 }
 
 
@@ -36,6 +43,69 @@ void FrequencyFinder::Start()
 void PrintError(wchar_t* string)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, string);
+}
+
+TArray<float> FrequencyFinder::GetHeights()
+{
+	TArray<float> freqs;
+	AudioChunk chunk;
+	if (m_sink.Dequeue(chunk))
+	{
+		if (chunk.size == 0)
+		{
+			return freqs;
+		}
+		CalculateFrequencySpectrum(m_testChunk.chunk, 2, m_testChunk.size, freqs);
+		//CalculateFrequencySpectrum(chunk.chunk, 2, chunk.size, freqs);
+	}
+	return freqs;
+
+	/*
+	if (freqs.Num() == 0)
+		return freqs;
+
+	// size / 2 because the latter half is just a mirror of the first half
+	float freqBinCount = freqs.Num() / 2;
+
+	float maxCount = m_frequencyStats.Num();
+
+	// The number of bins changes, so we can't map freq bins directly to the maxes.
+
+	TArray<float> normalizedFreqs;
+	//normalizedFreqs.AddUninitialized(maxCount);
+
+	float scale = freqBinCount / maxCount;
+	//float scale = maxCount / freqBinCount;
+	for (float i = 0; i < maxCount; i++)
+	{
+		int freqIdx = (int)(scale * i);
+		float newFreq = freqs[freqIdx];
+		if (newFreq > m_frequencyStats[i].max)
+		{
+			m_frequencyStats[i].max = newFreq;
+		}
+		if (newFreq < m_frequencyStats[i].min)
+		{
+			m_frequencyStats[i].min = newFreq;
+		}
+
+		float difference = m_frequencyStats[i].max - m_frequencyStats[i].min;
+
+		// Don't want to divide by zero
+		if(difference == 0)
+			normalizedFreqs.Add(0);
+		else
+		{
+			float relativeFrequency = (newFreq - m_frequencyStats[i].min) / difference;
+			normalizedFreqs.Add(relativeFrequency);
+		}
+
+	}
+
+
+	return normalizedFreqs;
+	//return freqs;
+	*/
 }
 
 float GetFFTInValue(const int16 InSampleValue, const int16 InSampleIndex, const int16 InSampleCount)
@@ -159,7 +229,7 @@ void FrequencyFinder::CalculateFrequencySpectrum
 
 			for (int32 SampleIndex = 0; SampleIndex < SamplesToRead; ++SampleIndex)
 			{
-				float ChannelSum = 0.0f;
+				double ChannelSum = 0.0f;
 
 				for (int32 ChannelIndex = 0; ChannelIndex < NumChannels; ++ChannelIndex)
 				{
@@ -176,8 +246,19 @@ void FrequencyFinder::CalculateFrequencySpectrum
 				//}
 				//else
 				//{
-					OutFrequencies[SampleIndex] = ChannelSum / NumChannels;
+				//	OutFrequencies[SampleIndex] = ChannelSum / NumChannels;
 				//}
+					//20 * log(2 * magnitude / N
+					//OutFrequencies[SampleIndex] = 20 * log(2 * ChannelSum)
+					//20 * log10(max(magnitude, 1e-10)); // 1e-10 = pow(10, -200/20);
+					OutFrequencies[SampleIndex] = 20 * FMath::LogX(10, std::max(ChannelSum, 1e-10));
+					//OutFrequencies[SampleIndex] = 20 * FMath::LogX(10, std::max(ChannelSum / ((double)NumChannels), 531072.0));
+				//OutFrequencies[SampleIndex] = 20 * FMath::LogX(10, 2 * (ChannelSum / NumChannels) * SampleIndex);
+
+
+
+
+					
 			}
 
 			// Make sure to free up the FFT stuff
@@ -198,64 +279,6 @@ void FrequencyFinder::CalculateFrequencySpectrum
 	}
 }
 
-TArray<float> FrequencyFinder::GetHeights()
-{
-	TArray<float> freqs;
-	AudioChunk chunk;
-	if (m_sink.Dequeue(chunk))
-	{
-		if (chunk.size == 0)
-		{
-			return freqs;
-		}
-		CalculateFrequencySpectrum(chunk.chunk, 2, chunk.size, freqs);
-	}
-
-	if (freqs.Num() == 0)
-		return freqs;
-
-	// size / 2 because the latter half is just a mirror of the first half
-	float freqBinCount = freqs.Num() / 2;
-
-	float maxCount = m_frequencyStats.Num();
-
-	// The number of bins changes, so we can't map freq bins directly to the maxes.
-
-	TArray<float> normalizedFreqs;
-	//normalizedFreqs.AddUninitialized(maxCount);
-
-	float scale = freqBinCount / maxCount;
-	//float scale = maxCount / freqBinCount;
-	for (float i = 0; i < maxCount; i++)
-	{
-		int freqIdx = (int)(scale * i);
-		float newFreq = freqs[freqIdx];
-		if (newFreq > m_frequencyStats[i].max)
-		{
-			m_frequencyStats[i].max = newFreq;
-		}
-		if (newFreq < m_frequencyStats[i].min)
-		{
-			m_frequencyStats[i].min = newFreq;
-		}
-
-		float difference = m_frequencyStats[i].max - m_frequencyStats[i].min;
-
-		// Don't want to divide by zero
-		if(difference == 0)
-			normalizedFreqs.Add(0);
-		else
-		{
-			float relativeFrequency = (newFreq - m_frequencyStats[i].min) / difference;
-			normalizedFreqs.Add(relativeFrequency);
-		}
-
-	}
-
-
-	return normalizedFreqs;
-	//return freqs;
-}
 
 /*
 std::vector<float> FrequencyFinder::GetHeights(int CurrentTime)
