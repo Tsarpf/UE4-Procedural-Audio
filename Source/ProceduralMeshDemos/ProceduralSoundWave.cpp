@@ -2,7 +2,7 @@
 
 #include "ProceduralMeshDemos.h"
 #include "ProceduralSoundWave.h"
-
+#include "EngineUtils.h"
 
 // Sets default values
 AProceduralSoundWave::AProceduralSoundWave()
@@ -23,6 +23,7 @@ AProceduralSoundWave::AProceduralSoundWave()
 	MeshComponent->bShouldSerializeMeshData = false;
 	MeshComponent->SetupAttachment(RootComponent);
 }
+void PrintError(wchar_t* string);
 
 // Called when the game starts or when spawned
 void AProceduralSoundWave::BeginPlay()
@@ -31,10 +32,20 @@ void AProceduralSoundWave::BeginPlay()
 
 	m_freqFinder.Start();
 
+	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		FString name = (*ActorItr)->GetName();
+		UE_LOG(LogTemp, Warning, TEXT("MyCharacter's Name is %s"), *name);
+		if (name == "vittuspawnaamuthomo_C_0")
+		{
+			UE_LOG(LogTemp, Warning, TEXT("found it motherFucker"));
+			m_cameraActor = (*ActorItr);
+		}
+	}
+
 	GenerateMesh(m_zeroHeights);
 }
 
-void PrintError(wchar_t* string);
 
 // Called every frame
 void AProceduralSoundWave::Tick(float DeltaTime)
@@ -54,11 +65,17 @@ void AProceduralSoundWave::Tick(float DeltaTime)
 	auto heights = m_freqFinder.GetHeights();
 	if (heights.Num() == 0)
 	{
-		PrintError(TEXT("heights was 0"));
+		//PrintError(TEXT("heights was 0"));
 		//return GenerateMesh(m_zeroHeights);
 	}
 	while (heights.Num() > 0)
 	{
+		// Move camera
+		//FVector location = GetOwner()->GetRootComponent()->GetOwner()->GetActorLocation();
+		FVector location = m_cameraActor->GetActorLocation();
+		location.X += m_xStepSize;
+		m_cameraActor->SetActorLocation(location);
+
 		GenerateMesh(heights);
 		heights = m_freqFinder.GetHeights();
 	}
@@ -121,7 +138,7 @@ void AProceduralSoundWave::GenerateWave
 		// We should assert that triangles have gone a full circle as well
 		m_triangleIdx = 0;
 
-		m_xWorldPos = 0;
+		//m_xWorldPos = 0;
 	}
 
 	// ratio of being there y / (Size.Y * m_yStepSize)

@@ -87,10 +87,10 @@ AudioListener::AudioListener(int BitsPerSample, int FormatTag, int BlockAlign, i
 AudioListener::~AudioListener()
 {
 	//CoTaskMemFree(m_pwfx);
-	SAFE_RELEASE(m_pEnumerator)
-	SAFE_RELEASE(m_pDevice)
-	SAFE_RELEASE(m_pAudioClient)
-	SAFE_RELEASE(m_pCaptureClient)
+	//SAFE_RELEASE(m_pEnumerator)
+	//SAFE_RELEASE(m_pDevice)
+	//SAFE_RELEASE(m_pAudioClient)
+	//SAFE_RELEASE(m_pCaptureClient)
 }
 HRESULT AudioListener::RecordAudioStream(IAudioSink* Sink, std::atomic<bool>& Done)
 {

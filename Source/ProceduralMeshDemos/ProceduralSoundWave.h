@@ -3,7 +3,9 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
 #include "FrequencyFinder.h"
+#include "LiikuPaska.h"
 #include "RuntimeMeshComponent.h"
 #include "ProceduralSoundWave.generated.h"
 
@@ -32,11 +34,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 	UMaterialInterface* Material;
 
+
 protected:
 	UPROPERTY()
 	URuntimeMeshComponent* MeshComponent;
 
 private:
+
+	//UPROPERTY(EditAnywhere, Category = "Following Camera")
+	AActor* m_cameraActor;
 
 	// Create vertex and triangle buffers
 	void SetupMeshBuffers();
