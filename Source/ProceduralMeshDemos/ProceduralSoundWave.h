@@ -5,7 +5,6 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/Pawn.h"
 #include "FrequencyFinder.h"
-#include "LiikuPaska.h"
 #include "RuntimeMeshComponent.h"
 #include "ProceduralSoundWave.generated.h"
 
@@ -29,7 +28,7 @@ public:
 #endif   // WITH_EDITOR
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-	FVector Size = FVector(300.0f, 200.0f, 100.0f);
+	FVector Size = FVector(400.0f, 200.0f, 100.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 	UMaterialInterface* Material;
@@ -70,10 +69,13 @@ private:
 
 	int32 m_vertexIdx = 0;
 	int32 m_triangleIdx = 0;
+
 	float m_xWorldPos = 0;
 	int32 m_vertexCount;
-	float m_xStepSize = 10;
-	float m_yStepSize = 10;
+
+	float m_xStepSize = 1;
+	float m_yStepSize = 1;
+
 	float m_timer = 0;
 	//uint32 m_zStepSize = 1; //set by scaling the height algorithm
 

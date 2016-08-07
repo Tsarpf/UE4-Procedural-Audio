@@ -146,15 +146,18 @@ void AProceduralSoundWave::GenerateWave
 	// scaled to other thing...
 	// heights.size() * above ratio
 
-	float smallerSize = (float)std::min(Heights.Num(), PreviousHeights.Num());
+
+	float idxMax = (float)std::min(Heights.Num(), PreviousHeights.Num());
 	auto time = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 	float epsilon = 0.1;
-	for (float y = 1; y < Size.Y - 1 - epsilon; y++)
-	//for (float y = 0; y < Size.Y; y++)
+	int lowFreqBinThreshold = std::min((int)idxMax, 50);
+	//for (y = 1; y < lowFreqBinThreshold - 1; y++)
+	/*
+	for (y = 1; y < Size.Y - 1; y++)
 	{
 		float yPos = y * m_yStepSize;
-		int heightIdx = static_cast<int>(y / Size.Y * smallerSize);
-		int heightIdxNext = static_cast<int>((y + 1) / Size.Y * smallerSize);
+		int heightIdx = y;
+		int heightIdxNext = y + 1;
 		//int heightIdxNext = heightIdx + 1;
 		int scale = 16;
 		float bottomLeftZ = PreviousHeights[heightIdx] * scale;
@@ -165,39 +168,54 @@ void AProceduralSoundWave::GenerateWave
 		FVector bottomRight(m_xWorldPos, yPos + m_yStepSize, bottomRightZ);
 		FVector topLeft(m_xWorldPos + m_xStepSize, yPos, topLeftZ);
 		FVector topRight(m_xWorldPos + m_xStepSize, yPos + m_yStepSize, topRightZ);
+		BuildQuad(m_vertices, m_triangles, bottomLeft, bottomRight, topRight, topLeft, m_vertexIdx, m_triangleIdx);
+	}
+	*/
 
-		/*
-		float zBottomLeft = 
-			sin(m_xWorldPos / 100.0f) * 100.0f
-			//+ cos(y / 100.0f + time * 4.f)
-			//cos(y / 100.0f + time * 4.f)
-			+ cos(y / 100.0f + time * 4.f)
-			* 100.f;
-		float zBottomRight = 
-			sin(m_xWorldPos / 100.0f) * 100.0f
-			//+ cos(y / 100.0f + time * 4.f)
-			//cos(y / 100.0f + time * 4.f)
-			+ cos((y + m_yStepSize) / 100.0f + time * 4.f)
-			* 100.f;
-
-		float zTopLeft = 
-			sin((m_xWorldPos + m_xStepSize) / 100.0f) * 100.0f
-			//+ cos((y + m_yStepSize) / 100.0f  + time * 4.f)
-			//cos((y + m_yStepSize) / 100.0f  + time * 4.f)
-			+ cos(y / 100.0f + time * 4.f)
-			* 100.f;
-		float zTopRight = 
-			sin((m_xWorldPos + m_xStepSize) / 100.0f) * 100.0f
-			//+ cos((y + m_yStepSize) / 100.0f  + time * 4.f)
-			//cos((y + m_yStepSize) / 100.0f  + time * 4.f)
-			+ cos((y + m_yStepSize) / 100.0f + time * 4.f)
-			* 100.f;
-		FVector bottomLeft(m_xWorldPos, y, zBottomLeft);
-		FVector bottomRight(m_xWorldPos, y + m_yStepSize, zBottomRight);
-		FVector topRight(m_xWorldPos + m_xStepSize, y + m_yStepSize, zTopRight);
-		FVector topLeft(m_xWorldPos + m_xStepSize, y, zTopLeft);
-		*/
-
+	float yPos = 0;
+	float idx;
+	for (idx = 0; idx < lowFreqBinThreshold - 1; idx++)
+	{
+		int repeats = FMath::Loge(idxMax - idx);
+		//if (idx < 10) repeats *= 2;
+		for (int y = 0; y < repeats; y++)
+		{
+			int scale = 16;
+			yPos += m_yStepSize;
+			//float yPos = (y + idx) * m_yStepSize;
+			int heightIdx = idx;
+			int heightIdxNext 
+				= y + 1 < repeats 
+				? idx 
+				: idx + 1; //+ 1;
+			float bottomLeftZ = PreviousHeights[heightIdx] * scale;
+			float bottomRightZ = PreviousHeights[heightIdxNext] * scale;
+			float topLeftZ = Heights[heightIdx] * scale;
+			float topRightZ = Heights[heightIdxNext] * scale;
+			FVector bottomLeft(m_xWorldPos, yPos, bottomLeftZ);
+			FVector bottomRight(m_xWorldPos, yPos + m_yStepSize, bottomRightZ);
+			FVector topLeft(m_xWorldPos + m_xStepSize, yPos, topLeftZ);
+			FVector topRight(m_xWorldPos + m_xStepSize, yPos + m_yStepSize, topRightZ);
+			BuildQuad(m_vertices, m_triangles, bottomLeft, bottomRight, topRight, topLeft, m_vertexIdx, m_triangleIdx);
+		}
+	}
+	//for (float y = 1; y < Size.Y - 1 - epsilon; y++)
+	//for (idx = lowFreqBinThreshold / idxMax * Size.Y; y < Size.Y - 1 - epsilon; y++)
+	for (; idx < Size.Y - 1 - epsilon; idx++)
+	{
+		yPos += m_yStepSize;
+		int heightIdx = static_cast<int>(idx / Size.Y * idxMax);
+		int heightIdxNext = static_cast<int>((idx + 1) / Size.Y * idxMax);
+		//int heightIdxNext = heightIdx + 1;
+		int scale = 16;
+		float bottomLeftZ = PreviousHeights[heightIdx] * scale;
+		float bottomRightZ = PreviousHeights[heightIdxNext] * scale;
+		float topLeftZ = Heights[heightIdx] * scale;
+		float topRightZ = Heights[heightIdxNext] * scale;
+		FVector bottomLeft(m_xWorldPos, yPos, bottomLeftZ);
+		FVector bottomRight(m_xWorldPos, yPos + m_yStepSize, bottomRightZ);
+		FVector topLeft(m_xWorldPos + m_xStepSize, yPos, topLeftZ);
+		FVector topRight(m_xWorldPos + m_xStepSize, yPos + m_yStepSize, topRightZ);
 
 		BuildQuad(m_vertices, m_triangles, bottomLeft, bottomRight, topRight, topLeft, m_vertexIdx, m_triangleIdx);
 	}

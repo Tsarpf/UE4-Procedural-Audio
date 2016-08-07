@@ -59,11 +59,13 @@ TArray<float> FrequencyFinder::GetHeights()
 		CalculateFrequencySpectrum(chunk.chunk, 2, chunk.size, freqs);
 	}
 	TArray<float> resultFloats;
-	int count = freqs.Num() * 2 - 1;
+	int count = freqs.Num() / 2 - 1;
 	resultFloats.Reserve(count);
 	for (int i = 1; i < freqs.Num() / 2; i++)
 	{
 		//UE_LOG(LogTemp, Log, TEXT("i: %d, Sample value %f"), i, freqs[i]);
+		//float scale = 1.0; //+ FMath::LogX(10, i) * 0.1;
+		//resultFloats.Add(freqs[i] * scale);
 		resultFloats.Add(freqs[i]);
 	}
 
