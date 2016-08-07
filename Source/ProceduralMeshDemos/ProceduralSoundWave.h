@@ -28,7 +28,7 @@ public:
 #endif   // WITH_EDITOR
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-	FVector Size = FVector(400.0f, 200.0f, 100.0f);
+	FVector Size = FVector(600.0f, 100.0f, 100.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 	UMaterialInterface* Material;
