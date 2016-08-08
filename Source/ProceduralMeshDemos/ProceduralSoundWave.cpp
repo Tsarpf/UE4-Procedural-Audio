@@ -150,17 +150,23 @@ void AProceduralSoundWave::GenerateWave
 	float idxMax = (float)std::min(Heights.Num(), PreviousHeights.Num());
 	auto time = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 	float epsilon = 0.1;
-	int lowFreqBinThreshold = std::min((int)idxMax, 20);
+	//int lowFreqBinThreshold = std::min((int)idxMax, 60);
+	int lowFreqBinThreshold = std::min(idxMax, Size.Y / 6);
 	float yPos = 0;
 	float idx;
 	for (idx = 0; idx < Size.Y - 2; idx++)
 	{
-		//int repeats = FMath::Loge(idxMax - idx);
+		//int repeats = FMath::Loge(Size.Y - idx);
+		//int repeats = FMath::Log2(Size.Y - idx);
 		//if (idx < 10) repeats *= 2;
-		int repeats = 20;
-		for (int y = 0; y < repeats; y++)
+		int repeats = 1;
+		if (idx < lowFreqBinThreshold)
 		{
-			int scale = 16;
+			repeats = 3;
+		}
+		for (int y = 0; y < repeats && idx < Size.Y - 2; y++)
+		{
+			int scale = 8;
 			yPos += m_yStepSize;
 
 			/*
@@ -171,47 +177,64 @@ void AProceduralSoundWave::GenerateWave
 					? idx
 					: idx + 1; //+ 1;
 			*/
+			float bottomLeftZ = 0;
+			float bottomRightZ = 0;
+			float topLeftZ = 0;
+			float topRightZ = 0;
 			int heightIdx, heightIdxNext;
 			if (idx < lowFreqBinThreshold)
 			{
 				heightIdx = idx;
-				heightIdxNext
-					= y + 1 < repeats
-					? idx
-					: idx + 1; //+ 1;
+				heightIdxNext = (y + 1 < repeats) ? idx	: idx + 1; //+ 1;
+				bottomLeftZ = PreviousHeights[heightIdx] * scale;
+				bottomRightZ = PreviousHeights[heightIdxNext] * scale;
+				topLeftZ = Heights[heightIdx] * scale;
+				topRightZ = Heights[heightIdxNext] * scale;
 			}
 			else
 			{
-				heightIdx = static_cast<int>(idx / Size.Y * idxMax);
-				heightIdxNext
-					= y + 1 < repeats
-					? heightIdx
-					: static_cast<int>((idx + 1) / Size.Y * idxMax);
+				// we want the range from lowfreqbinthreshold to idxmax,
+				// not the whole 0 to idxmax range
+				int indicesForScaling = Size.Y - lowFreqBinThreshold;
+				int range = idxMax - lowFreqBinThreshold;
+				int offset = lowFreqBinThreshold;
+				int stepSize = range / indicesForScaling;
+				int stepNum = idx - lowFreqBinThreshold;
+				int highFreqBinIdx = offset + stepSize * stepNum;
+
+				heightIdx = highFreqBinIdx;
+				heightIdxNext = (y + 1 < repeats) ? highFreqBinIdx : highFreqBinIdx + stepSize; //+ 1;
+
+				float count = heightIdx == heightIdxNext ? 1 : heightIdxNext - heightIdx;
+				for (int i = 0; i < count; i++)
+				{
+					bottomLeftZ += PreviousHeights[heightIdx + i];
+					bottomRightZ += PreviousHeights[heightIdxNext + i];
+					topLeftZ += Heights[heightIdx + i];
+					topRightZ += Heights[heightIdxNext + i];
+				}
+				bottomLeftZ /= count;
+				bottomLeftZ *= scale;
+				bottomRightZ /= count;
+				bottomRightZ *= scale;
+				topLeftZ /= count;
+				topLeftZ *= scale;
+				topRightZ /= count;
+				topRightZ *= scale;
+				idx += repeats;
 			}
-			float bottomLeftZ = 0, bottomRightZ = 0, topLeftZ = 0, topRightZ = 0;
-			float count = heightIdx == heightIdxNext ? 1 : heightIdxNext - heightIdx;
-			for (int i = 0; i < heightIdxNext - heightIdx; i++)
-			{
-				bottomLeftZ += PreviousHeights[heightIdx + i];
-				bottomRightZ += PreviousHeights[heightIdxNext + i];
-				topLeftZ += Heights[heightIdx + i];
-				topRightZ += Heights[heightIdxNext + i];
-			}
-			bottomLeftZ /= count;
-			bottomLeftZ *= scale;
-			//UE_LOG(LogTemp, Warning, TEXT("bottomleftz %f"), bottomLeftZ);
-			bottomRightZ /= count;
-			bottomRightZ *= scale;
-			topLeftZ /= count;
-			topLeftZ *= scale;
-			topRightZ /= count;
-			topRightZ *= scale;
+			//UE_LOG(LogTemp, Warning, TEXT("idx: %f y: %f bottomLeftZ: %f"), idx, y, bottomLeftZ);
+			//UE_LOG(LogTemp, Warning, TEXT("idx: %f y: %f bottomRightZ: %f"), idx, y, bottomRightZ);
+			//UE_LOG(LogTemp, Warning, TEXT("idx: %f y: %f topLeftZ: %f"), idx, y, topLeftZ);
+			//UE_LOG(LogTemp, Warning, TEXT("idx: %f y: %f topRightZ: %f"), idx, y, topRightZ);
 			FVector bottomLeft(m_xWorldPos, yPos, bottomLeftZ);
 			FVector bottomRight(m_xWorldPos, yPos + m_yStepSize, bottomRightZ);
 			FVector topLeft(m_xWorldPos + m_xStepSize, yPos, topLeftZ);
 			FVector topRight(m_xWorldPos + m_xStepSize, yPos + m_yStepSize, topRightZ);
 			BuildQuad(m_vertices, m_triangles, bottomLeft, bottomRight, topRight, topLeft, m_vertexIdx, m_triangleIdx);
+
 		}
+		//yPos += m_yStepSize * 3;
 	}
 
 	//m_arrayPos++;
