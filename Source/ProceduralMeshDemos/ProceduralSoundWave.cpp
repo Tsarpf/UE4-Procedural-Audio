@@ -36,9 +36,9 @@ void AProceduralSoundWave::BeginPlay()
 	{
 		FString name = (*ActorItr)->GetName();
 		UE_LOG(LogTemp, Warning, TEXT("MyCharacter's Name is %s"), *name);
-		if (name == "vittuspawnaamuthomo_C_0")
+		if (name == "umm")
 		{
-			UE_LOG(LogTemp, Warning, TEXT("found it motherFucker"));
+			UE_LOG(LogTemp, Warning, TEXT("found it"));
 			m_cameraActor = (*ActorItr);
 		}
 	}
