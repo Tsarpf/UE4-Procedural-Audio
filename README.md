@@ -1,4 +1,4 @@
-see https://rabid.prototyping.xyz/2017/01/05/procedural-mesh-generation-from-live-audio-in-unreal-engine-4/ for a short description
+see https://rabid.prototyping.xyz/procedural-mesh-generation-from-live-audio-in-unreal-engine-4/ for a short description
 
 ## Example videos (Click to watch)
 
